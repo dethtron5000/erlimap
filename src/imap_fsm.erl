@@ -5,7 +5,7 @@
 -behaviour(gen_fsm).
 
 %% api
--export([connect/2, connect_ssl/2, login/3, logout/1, noop/1, disconnect/1,
+-export([connect/2, connect_ssl/2, login/3, logout/1, noop/1, disconnect/1, authorize/3,
          select/2, examine/2,
          search/2,
          fetch/3,
@@ -45,6 +45,9 @@ connect_ssl(Host, Port) ->
 
 login(Conn, User, Pass) ->
   gen_fsm:sync_send_event(Conn, {command, login, {User, Pass}}).
+
+authorize(Conn, User, Authstring) ->
+  gen_fsm:sync_send_event(Conn, {command, authorize, {User, Authstring}}).
 
 logout(Conn) ->
   gen_fsm:sync_send_event(Conn, {command, logout, {}}).

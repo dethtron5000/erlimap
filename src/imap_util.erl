@@ -2,7 +2,7 @@
 
 -include("imap.hrl").
 
--export([identity_fun/1, catch_first_error/1, extract_dict_element/2,
+-export([identity_fun/1, catch_first_error/1, extract_dict_element/2, prep_user_string/2,
          clean_line/1, start_ssl/0, sock_connect/4, sock_send/3, sock_close/2,
          gen_tag/0, quote_mbox/1, to_key/1]).
 -export([to_binary/1, to_int/1, to_list/1, to_float/1, to_atom/1]).
@@ -95,6 +95,10 @@ to_atom(undefined)         -> undefined;
 to_atom(V) when is_atom(V) -> V;
 to_atom(V) when is_list(V) -> list_to_atom(V);
 to_atom(V)                 -> to_atom(to_list(V)).
+
+prep_user_string(Email,Authstring) ->
+  Out = "user=" ++ Email ++ "\001auth=Bearer " ++ Authstring ++ " \001\001",
+  base64:encode_to_string(Out).
 
 %%%-----------
 %%% internal

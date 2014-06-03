@@ -24,6 +24,8 @@ send_command(SockType, Sock, Command) ->
 
 prepare_command({command, login, {User, Pass}}) ->
   prepare_tagged_command("LOGIN ~s ~s", [User, Pass]);
+prepare_command({command, authorize, {Email, Authstring}}) ->
+  prepare_tagged_command("AUTHENTICATE XOAUTH2 ~s", [imap_util:prep_user_string(Email, Authstring)]);
 prepare_command({command, logout, {}}) ->
   prepare_tagged_command("LOGOUT", []);
 prepare_command({command, select, Mailbox}) ->

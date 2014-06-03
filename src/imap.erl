@@ -4,7 +4,7 @@
 
 -behaviour(gen_server).
 
--export([open_account/5, close_account/1,
+-export([open_account/5, close_account/1,authorize_account/5,
          select/2, examine/2, search/2, fetch/3, store/4
         ]).
 
@@ -17,6 +17,9 @@
 
 open_account(ConnType, Host, Port, User, Pass) ->
   gen_server:start_link(?MODULE, {ConnType, Host, Port, User, Pass}, []).
+
+authorize_account(ConnType, Host, Port, User, Authstring) ->
+  gen_server:start_link(?MODULE, {ConnType, Host, Port, User, Authstring, authorize}, []).
 
 close_account(Account) ->
   gen_server:call(Account, close_account).
@@ -46,6 +49,18 @@ init({ConnType, Host, Port, User, Pass}) ->
                    ssl -> imap_fsm:connect_ssl(Host, Port)
                  end,
     ok = imap_fsm:login(Conn, User, Pass),
+    {ok, Conn}
+  catch
+    error:{badmatch, {error, Reason}} -> {stop, Reason}
+  end;
+
+  init({ConnType, Host, Port, User, Authstring, authorize}) ->
+  try
+    {ok, Conn} = case ConnType of
+                   tcp -> imap_fsm:connect(Host, Port);
+                   ssl -> imap_fsm:connect_ssl(Host, Port)
+                 end,
+    ok = imap_fsm:authorize(Conn, User, Authstring),
     {ok, Conn}
   catch
     error:{badmatch, {error, Reason}} -> {stop, Reason}

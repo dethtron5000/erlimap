@@ -33,6 +33,17 @@ analyze_response(not_authenticated, Responses, {command, login, {_, _}}, From) -
       send_client_response_result(Other, From),
       not_authenticated
   end;
+
+analyze_response(not_authenticated, Responses, {command, authorize, {_, _}}, From) ->
+  case get_response_result(Responses) of
+    {result, ok} ->
+      send_client_response_result(ok, From),
+      authenticated;
+    {result, Other} ->
+      send_client_response_result(Other, From),
+      not_authenticated
+  end;
+
 %% LOGOUT
 analyze_response(StateName, Responses, {command, logout, {}}, From) ->
   HasBye = check_response_has(Responses, "BYE"),
